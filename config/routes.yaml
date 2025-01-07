@@ -3,3 +3,92 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Fetch all zones
+get_zones:
+    path: /zones
+    controller: App\Controller\ZoneController::getZones
+    methods: [GET]
+
+# Create a zone
+create_zone:
+    path: /zones
+    controller: App\Controller\ZoneController::createZone
+    methods: [POST]
+
+# Update a zone
+update_zone:
+    path: /zones/{id}
+    controller: App\Controller\ZoneController::updateZone
+    methods: [PUT]
+
+# Delete a zone
+delete_zone:
+    path: /zones/{id}
+    controller: App\Controller\ZoneController::deleteZone
+    methods: [DELETE]
+
+match_address:
+    path: /match-address
+    controller: App\Controller\ZoneController::matchAddress
+    methods: [POST]
+
+
+get_users:
+    path: /users
+    controller: App\Controller\UserController::getUsers
+    methods: [GET]
+
+create_user:
+    path: /users
+    controller: App\Controller\UserController::createUser
+    methods: [POST]
+
+update_user:
+    path: /users/{id}
+    controller: App\Controller\UserController::updateUser
+    methods: [PUT]
+
+delete_user:
+    path: /users/{id}
+    controller: App\Controller\UserController::deleteUser
+    methods: [DELETE]
+
+get_interventions:
+    path: /interventions
+    controller: App\Controller\InterventionController::getInterventions
+    methods: [GET]
+
+create_intervention:
+    path: /interventions
+    controller: App\Controller\InterventionController::createIntervention
+    methods: [POST]
+
+get_intervention:
+    path: /interventions/{id}
+    controller: App\Controller\InterventionController::getIntervention
+    methods: [GET]
+
+update_intervention:
+    path: /interventions/{id}
+    controller: App\Controller\InterventionController::updateIntervention
+    methods: [PUT]
+
+delete_intervention:
+    path: /interventions/{id}
+    controller: App\Controller\InterventionController::deleteIntervention
+    methods: [DELETE]
+
+get_technician_interventions:
+    path: /interventions/technician/{technicianId}
+    controller: App\Controller\InterventionController::getInterventionsByTechnician
+    methods: [GET]
+login_user:
+    path: /login
+    controller: App\Controller\LoginController::login
+    methods: [POST]
+availability:
+    path: /availability/{technicianId}
+    controller: App\Controller\ZoneController::getTechnicianAvailability
+    methods: [GET]
+

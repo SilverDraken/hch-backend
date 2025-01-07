@@ -1,0 +1,17 @@
+# config/packages/doctrine_mongodb.yaml
+doctrine_mongodb:
+    connections:
+        default:
+            server: '%env(MONGODB_URL)%'
+            options: {}
+    default_database: '%env(MONGODB_DB)%'
+    document_managers:
+        default:
+            auto_mapping: false
+            mappings:
+                App:
+                    is_bundle: false
+                    type: attribute  # Use annotation for MongoDB ODM
+                    dir: '%kernel.project_dir%/src/Document'
+                    prefix: 'App\Document'
+                    alias: App

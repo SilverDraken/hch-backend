@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervention Calendar</title>
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <!-- Tippy.js CSS -->
+    <link href="https://unpkg.com/tippy.js@6/themes/light.css" rel="stylesheet">
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <!-- Tippy.js JS -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+    
+        #container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+    
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+    
+        #addInterventionBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        #addInterventionBtn:hover {
+            background-color: #0056b3;
+        }
+    
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+    
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+            max-width: 600px;
+            width: 90%;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+    
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: #333;
+        }
+    
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #999;
+        }
+    
+        .modal-header button:hover {
+            color: #333;
+        }
+    
+        .modal-body label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #555;
+        }
+    
+        .modal-body input,
+        .modal-body select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+    
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    
+        .modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        .modal-footer .save-btn {
+            background-color: #28a745;
+            color: #ffffff;
+        }
+    
+        .modal-footer .save-btn:hover {
+            background-color: #218838;
+        }
+    
+        .modal-footer .cancel-btn {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+    
+        .modal-footer .cancel-btn:hover {
+            background-color: #c82333;
+        }
+    
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    
+        .visible {
+            display: block;
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="container">
+        <h1>Intervention Calendar</h1>
+        <button id="addInterventionBtn" onclick="openAddModal()">Add Intervention</button>
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Modal for adding/editing interventions -->
+    <div class="overlay" id="overlay"></div>
+    <div class="modal" id="interventionModal">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Intervention</h2>
+            <button onclick="closeModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        <div class="modal-body">
+            <label for="interventionType">Type:</label>
+            <input type="text" id="interventionType" placeholder="Enter intervention type" />
+
+            <label for="interventionDate">Date of Intervention:</label>
+            <input type="date" id="interventionDate" />
+
+            <label for="interventionTime">Start Time:</label>
+            <input type="time" id="interventionTime" />
+
+            <label for="interventionLength">Length (minutes):</label>
+            <input type="number" id="interventionLength" placeholder="Enter length in minutes" />
+
+            <label for="bikeModel">Bike Model:</label>
+            <input type="text" id="bikeModel" placeholder="Enter bike model" />
+
+            <label for="clientName">Client Name:</label>
+            <input type="text" id="clientName" placeholder="Enter client name" />
+
+            <label for="clientAddress">Client Address:</label>
+            <input type="text" id="clientAddress" placeholder="Enter client address" />
+
+            <label for="clientEmail">Client Email:</label>
+            <input type="email" id="clientEmail" placeholder="Enter client email" />
+
+            <label for="clientPhone">Client Phone:</label>
+            <input type="text" id="clientPhone" placeholder="Enter client phone" />
+
+            <label for="zoneSelect">Zone:</label>
+            <select id="zoneSelect"></select>
+
+            <label for="technicianSelect">Technician:</label>
+            <select id="technicianSelect"></select>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="save-btn" onclick="saveIntervention()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        // Declare variables in the global scope
+let editingInterventionId = null;
+let calendar;
+
+// Ensure DOM is fully loaded before initializing the calendar
+document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+
+    // Initialize FullCalendar
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        slotDuration: '00:15:00',
+        events: fetchEvents,
+        eventClick: handleEventClick,
+        eventDidMount: addTooltip,
+    });
+
+    calendar.render();
+});
+
+// Fetch events dynamically
+function fetchEvents(fetchInfo, successCallback, failureCallback) {
+    fetch('/interventions')
+        .then(response => response.json())
+        .then(data => {
+            const events = data.map(intervention => {
+                const time = intervention.time || '00:00'; // Default to midnight if time is missing
+                const startTime = new Date(`${intervention.dateOfIntervention}T${time}`);
+                if (isNaN(startTime.getTime())) {
+                    console.error('Invalid start time for intervention:', intervention);
+                    return null; // Skip invalid interventions
+                }
+
+                const endTime = new Date(startTime.getTime() + (intervention.length || 0) * 60000);
+
+                return {
+                    id: intervention.id,
+                    title: `${intervention.type} - ${intervention.client.name}`,
+                    start: startTime.toISOString(),
+                    end: endTime.toISOString(),
+                    extendedProps: {
+                        description: `
+                            <strong>Type:</strong> ${intervention.type}<br>
+                            <strong>Date:</strong> ${intervention.dateOfIntervention} ${time}<br>
+                            <strong>Length:</strong> ${intervention.length || 'Unknown'} minutes<br>
+                            <strong>Bike Model:</strong> ${intervention.bikeModel}<br>
+                            <strong>Client:</strong> ${intervention.client.name} (${intervention.client.email})<br>
+                            <strong>Address:</strong> ${intervention.client.address}<br>
+                            <strong>Technician:</strong> ${intervention.technician || 'Unassigned'}<br>
+                            <strong>Zone:</strong> ${intervention.zone || 'Unassigned'}
+                        `
+                    }
+                };
+            }).filter(event => event !== null); // Remove invalid events
+
+            successCallback(events);
+        })
+        .catch(error => {
+            console.error('Error fetching interventions:', error);
+            failureCallback(error);
+        });
+}
+
+
+
+// Add tooltips to events
+function addTooltip(info) {
+    tippy(info.el, {
+        content: info.event.extendedProps.description,
+        allowHTML: true,
+        theme: 'light',
+        interactive: true,
+        maxWidth: 300,
+    });
+}
+
+// Handle event clicks to edit an intervention
+function handleEventClick(info) {
+    const event = info.event;
+
+    // Store the event ID for updating
+    editingInterventionId = event.id;
+
+    // Fetch the intervention details from the backend
+    fetch(`/interventions/${editingInterventionId}`)
+        .then(response => response.json())
+        .then(intervention => {
+            // Set the modal to "Edit" mode
+            document.getElementById('modalTitle').textContent = 'Edit Intervention';
+
+            // Populate the modal fields with the fetched intervention data
+            document.getElementById('interventionType').value = intervention.type || '';
+            document.getElementById('interventionDate').value = intervention.dateOfIntervention || '';
+            document.getElementById('interventionTime').value = intervention.time || '00:00'; // Default to midnight if time is missing
+            document.getElementById('interventionLength').value = intervention.length || ''; // Default to empty if length is missing
+            document.getElementById('bikeModel').value = intervention.bikeModel || '';
+            document.getElementById('clientName').value = intervention.client.name || '';
+            document.getElementById('clientAddress').value = intervention.client.address || '';
+            document.getElementById('clientEmail').value = intervention.client.email || '';
+            document.getElementById('clientPhone').value = intervention.client.phoneNumber || '';
+
+            // Load zones and technicians dynamically and pre-select the current ones
+            loadZonesAndTechnicians(intervention.zone, intervention.technician);
+        })
+        .catch(error => console.error('Error fetching intervention details:', error));
+
+    // Show the modal
+    document.getElementById('overlay').classList.add('visible');
+    document.getElementById('interventionModal').classList.add('visible');
+}
+
+
+
+// Open the modal for adding a new intervention
+function openAddModal() {
+    // Reset editing ID for creating a new intervention
+    editingInterventionId = null;
+
+    // Set the modal to "Add" mode
+    document.getElementById('modalTitle').textContent = 'Add Intervention';
+
+    // Reset modal fields
+    resetModalFields();
+
+    // Load zones and technicians for selection
+    loadZonesAndTechnicians();
+
+    // Show the modal
+    document.getElementById('overlay').classList.add('visible');
+    document.getElementById('interventionModal').classList.add('visible');
+}
+
+
+// Close the modal
+function closeModal() {
+    document.getElementById('overlay').classList.remove('visible');
+    document.getElementById('interventionModal').classList.remove('visible');
+}
+
+// Reset modal fields
+function resetModalFields() {
+    document.getElementById('interventionType').value = '';
+    document.getElementById('interventionDate').value = '';
+    document.getElementById('interventionTime').value = '';
+    document.getElementById('interventionLength').value = '';
+    document.getElementById('bikeModel').value = '';
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientAddress').value = '';
+    document.getElementById('clientEmail').value = '';
+    document.getElementById('clientPhone').value = '';
+    document.getElementById('zoneSelect').innerHTML = '';
+    document.getElementById('technicianSelect').innerHTML = '';
+}
+
+
+// Load zones and technicians dynamically
+function loadZonesAndTechnicians(selectedZone, selectedTechnician) {
+    fetch('/zones')
+        .then(response => response.json())
+        .then(zones => {
+            const zoneSelect = document.getElementById('zoneSelect');
+            zoneSelect.innerHTML = ''; // Clear previous options
+            zones.forEach(zone => {
+                const option = document.createElement('option');
+                option.value = zone.id;
+                option.textContent = zone.name;
+                if (zone.id === selectedZone) option.selected = true; // Pre-select the assigned zone
+                zoneSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching zones:', error));
+
+    fetch('/users?role=Technician')
+        .then(response => response.json())
+        .then(users => {
+            const technicianSelect = document.getElementById('technicianSelect');
+            technicianSelect.innerHTML = ''; // Clear previous options
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.username;
+                if (user.id === selectedTechnician) option.selected = true; // Pre-select the assigned technician
+                technicianSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching technicians:', error));
+}
+
+
+// Save intervention (create or update)
+function saveIntervention() {
+    const data = {
+        type: document.getElementById('interventionType').value,
+        dateOfIntervention: document.getElementById('interventionDate').value,
+        time: document.getElementById('interventionTime').value,
+        length: parseInt(document.getElementById('interventionLength').value, 10),
+        bikeModel: document.getElementById('bikeModel').value,
+        client: {
+            name: document.getElementById('clientName').value,
+            address: document.getElementById('clientAddress').value,
+            email: document.getElementById('clientEmail').value,
+            phoneNumber: document.getElementById('clientPhone').value,
+        },
+        zoneId: document.getElementById('zoneSelect').value,
+        technicianId: document.getElementById('technicianSelect').value,
+    };
+
+    const method = editingInterventionId ? 'PUT' : 'POST';
+    const url = editingInterventionId ? `/interventions/${editingInterventionId}` : '/interventions';
+
+    fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to save intervention');
+            closeModal();
+            calendar.refetchEvents();
+        })
+        .catch(error => console.error('Error saving intervention:', error));
+}
+
+
+    </script>
+</body>
+</html>
